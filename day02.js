@@ -16,6 +16,7 @@ fileInput.addEventListener('change', (event) => {
             var fileArray = temp.map(temp => temp.split(/\s+/));
             var safeTotal = 0;
             for (let i = 0; i < fileArray.length; i++) {
+                var array = fileArray[i];
                 if (testIncrease(fileArray[i]) == true || testDecrease(fileArray[i]) == true || fixArray(fileArray[i]) == true) {
                     safeTotal += 1;
                 } 
@@ -65,6 +66,7 @@ function fixArray(array) {
     for (let k = 0; k < array.length; k++) {
         newArray = [...array];
         newArray.splice(k, 1);
+        newArray.pop();
 
         if (testIncrease(newArray) || testDecrease(newArray)) {
             isSafe = true;

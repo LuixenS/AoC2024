@@ -10,19 +10,16 @@ fileInput.addEventListener('change', (event) => {
         const reader = new FileReader();
         reader.onload = (e) => {
             fileContent = e.target.result;
+            fileContent = fileContent.trimEnd();
             fileContent = "do()"+fileContent;
             var sections = fileContent.split(/do\(\)|don't\(\)/);
             var marks = fileContent.match(/do\(\)|don't\(\)/g);
-            console.log(sections);
-            console.log(marks);
             var match = fileContent.match(/mul\((\d+),(\d+)\)/g);
-            console.log(match);
             if (match) {
                 var numArray = match.map(match => {
                     let nums = match.replace("mul(", "").replace(")", "");
                     return nums.split(",").map(num => parseInt(num));
                 });
-                console.log(numArray);
             }
 
             //Star 1
@@ -32,7 +29,7 @@ fileInput.addEventListener('change', (event) => {
                     totalSum += numArray[i][0] * numArray[i][1];
                 }
             }
-            console.log(totalSum);
+            console.log("Star 1: "+totalSum);
 
             //Star 2
             var sum2 = 0;
@@ -49,7 +46,7 @@ fileInput.addEventListener('change', (event) => {
                     }
                 }
             }
-            console.log(sum2);
+            console.log("Star 2: "+sum2);
         };
         reader.readAsText(file);
     }

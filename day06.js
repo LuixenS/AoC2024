@@ -13,7 +13,9 @@ fileInput.addEventListener('change', (event) => {
             fileContent = fileContent.trimEnd();
             var temp = fileContent.split('\n');
             var map = temp.map(line => line.replace('\r', '').split(""));
+            const originalMap = JSON.parse(JSON.stringify(map));
             var count = 0;
+            var obsCount = 0;
             var check = false;
             for (let i = 0; i < map.length; i++) {
                 for (let j = 0; j < map[i].length; j++) {
@@ -21,13 +23,21 @@ fileInput.addEventListener('change', (event) => {
                         count += pathFinding(map, i, j);
                         check = true;
                     }
-                    if(check==true) break;
+                    if (check == true) break;
                 }
-                if(check==true) break;
+                if (check == true) break;
             }
-
+            var pathedMap = [...map];
+            for (let i = 0; i < originalMap.length; i++) {
+                for (let j = 0; j < originalMap[i].length; j++) {
+                    if (originalMap[i][j] != '#' && originalMap[i][j] != '.') {
+                        obsCount += obstacle(originalMap, pathedMap, i, j)
+                    }
+                }
+            }
             console.log(map);
             console.log(count);
+            console.log(obsCount);
         };
         reader.readAsText(file);
     }
@@ -72,7 +82,7 @@ function pathFinding(map, i, j) {
                     map[i][k - 1] = 'v';
                     j = k - 1;
                     break;
-                } if (k+1 >= map.length[i]) {
+                } if (k + 1 >= map.length[i]) {
                     inbounds = false;
                 }
             }
@@ -90,7 +100,7 @@ function pathFinding(map, i, j) {
                     map[k - 1][j] = '<';
                     i = k - 1;
                     break;
-                } if (k+1 >= map.length) {
+                } if (k + 1 >= map.length) {
                     inbounds = false;
                 }
             }
@@ -117,6 +127,151 @@ function pathFinding(map, i, j) {
     return count;
 }
 
+//Star 2
+function obstacle(orMap, paMap, i, j) {
+    var originalMap = JSON.parse(JSON.stringify(orMap));
+    var tempMap = [...paMap];
+    let count = 0;
+    for (let k = 0; k < tempMap.length; k++) {
+        for (let l = 0; l < tempMap[k].length; l++) {
+            originalMap = JSON.parse(JSON.stringify(orMap));
+            if (tempMap[k][l] == 'X' && (originalMap[k][l] != '^' && originalMap[k][l] != '>' && originalMap[k][l] != 'v' && originalMap[k][l] != '<')) {
+                originalMap[k][l] = '#';
+                if (loopFinding(originalMap, i, j) == false) {
+                    count += 1;
+                }
+            }
+        }
+    }
+    return count;
+}
 
+function loopFinding(map, i, j) {
+    var iterations = 17000;
+    var noloop = true;
+    var inbounds = true;
+    var count = 0;
+
+    while (inbounds) {
+        iterations -= 1;
+        if(iterations <= 0) {
+            noloop = false;
+            return noloop;
+        }
+        if (map[i][j] == '^') {
+            if (count != 0) {
+                map[i][j] = '+';
+            } else {
+                map[i][j] = '.';
+            }
+            for (let k = i; k >= 0; k--) {
+                if (map[k][j] == '#') {
+                    if (map[k + 1][j] == '+') {
+                        if (map[k + 1][j - 1] == '#') {
+                            map[k + 1][j] = '>';
+                            break;
+                        }
+                        noloop = false;
+                        return noloop;
+                    }
+                    map[k + 1][j] = '>';
+                    i = k + 1;
+                    break;
+                }
+                if (k - 1 < 0) {
+                    inbounds = false;
+                }
+                count += 1;
+                iterations -= 1;
+            }
+        }
+
+        if (map[i][j] == '>') {
+            if (count != 0) {
+                map[i][j] = '+';
+            } else {
+                map[i][j] = '.';
+            }
+            for (let k = j; k < map[i].length; k++) {
+                if (map[i][k] == '#') {
+                    if (map[i][k - 1] == '+') {
+                        if (map[i - 1][k - 1] == '#') {
+                            map[i][k - 1] = 'v';
+                            break;
+                        }
+                        noloop = false;
+                        return noloop;
+                    }
+                    map[i][k - 1] = 'v';
+                    j = k - 1;
+                    break;
+                }
+                if (k + 1 >= map[i].length) {
+                    inbounds = false;
+                }
+                count += 1;
+                iterations -= 1;
+            }
+        }
+
+        if (map[i][j] == 'v') {
+            if (count != 0) {
+                map[i][j] = '+';
+            } else {
+                map[i][j] = '.';
+            }
+            for (let k = i; k < map.length; k++) {
+                if (map[k][j] == '#') {
+                    if (map[k - 1][j] == '+') {
+                        if (map[k - 1][j + 1] == '#') {
+                            map[k - 1][j] = '<';
+                            break;
+                        }
+                        noloop = false;
+                        return noloop;
+                    }
+                    map[k - 1][j] = '<';
+                    i = k - 1;
+                    break;
+                }
+                if (k + 1 >= map.length) {
+                    inbounds = false;
+                }
+                count += 1;
+                iterations -= 1;
+            }
+        }
+
+        if (map[i][j] == '<') {
+            if (count != 0) {
+                map[i][j] = '+';
+            } else {
+                map[i][j] = '.';
+            }
+            for (let k = j; k >= 0; k--) {
+                if (map[i][k] == '#') {
+                    if (map[i][k + 1] == '+') {
+                        if (map[i + 1][k + 1] == '#') {
+                            map[i][k + 1] = '^';
+                            break;
+                        }
+                        noloop = false;
+                        return noloop;
+                    }
+                    map[i][k + 1] = '^';
+                    j = k + 1;
+                    break;
+                }
+                if (k - 1 < 0) {
+                    inbounds = false;
+                }
+                count += 1;
+                iterations -= 1;
+            }
+        }
+    }
+
+    return noloop;
+}
 
 

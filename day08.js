@@ -76,7 +76,7 @@ function validCoordinate(map, x, y) {
 
 
 
-// Star 2 CHECK
+// Star 2
 function checkLine(map, value, x, y, antiNodeLine) {
     var delta = [0, 0];
     var node = [0, 0];
